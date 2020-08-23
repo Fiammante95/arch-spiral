@@ -6,8 +6,8 @@ from matplotlib import animation
 
 # ------------------------------
 vc0 = 500 # mm/min
-vc1 = 10000 # mm/min
-pmin = 5 # mm minimum distance between channels
+vc1 = 50000 # mm/min
+pmin = 2 # mm minimum distance between channels
 
 dmax = 120 # mm # suggested: 154 - 254, 120 is the size of a CD
 dmin = 15 # mm
@@ -93,6 +93,7 @@ label_vf = ax.text(-d1/2, d1/2+d1/40, "traverse speed: "+str(round(vf*60))+" mm/
 label_rpm = ax.text(-d1/2, d1/2+2*d1/40, "")
 label_vc = ax.text(-d1/2, d1/2+3*d1/40, "")
 label_T = ax.text(-d1/2, d1/2+4*d1/40, "")
+label_p = ax.text(-d1/2, d1/2+5*d1/40, "distance between channels: "+str(pmin)+" mm")
 
 
 
@@ -117,8 +118,9 @@ def init():
     label_rpm.set_text("")
     label_vc.set_text("")
     label_T.set_text("")
+    label_p.set_text("")
 
-    return point, line, label_rpm, label_vc, label_T
+    return point, line, label_rpm, label_vc, label_T, label_p
 
 # animation function.  This is called sequentially
 def animate(i):
@@ -159,8 +161,9 @@ def animate(i):
         label_rpm.set_text("rotation speed: "+str(round(om*60/2/np.pi,1))+" rpm --- range: ("+str(round(om0*60/2/np.pi,1))+" - "+str(round(om1*60/2/np.pi,1))+")")
         label_vc.set_text("cutting speed: "+str(round(np.sqrt((vf**2+(x*om)**2))*60,1))+" mm/min --- range: ("+str(round(vc0*60,1))+" - "+str(round(vc1*60,1))+")")
         label_T.set_text("experiment time: "+str(round(i*dT/1000,1))+"/"+str(round(T,1))+" s")
+        label_p.set_text("distance between channels: "+str(round(vf*2*np.pi/om,1))+" mm")
 
-    return point, line, label_rpm, label_vc, label_T
+    return point, line, label_rpm, label_vc, label_T, label_p
 
 # call the animator.  blit=True means only re-draw the parts that have changed.
 anim = animation.FuncAnimation(fig, animate, init_func=init,
