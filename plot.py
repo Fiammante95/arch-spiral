@@ -5,8 +5,8 @@ from matplotlib import patches as mpatches
 from matplotlib import animation
 
 # ------------------------------
-vc0 = 50 # mm/min
-vc1 = 100000 # mm/min
+vc0 = 500 # mm/min
+vc1 = 1000 # mm/min
 pmin = 1 # mm minimum distance between channels
 
 dmax = 120 # mm # suggested: 154 - 254, 120 is the size of a CD
@@ -15,7 +15,8 @@ dmin = 15 # mm
 d0 = 15
 d1 = 120
 
-framerate = 50 # Hz # suggested:divisor of 1000, like 100
+framerate = 25 # Hz # suggested:divisor of 1000, like 100
+framescale = 10
 # ------------------------------
 
 # initial point coordinates
@@ -122,41 +123,42 @@ def init():
 # animation function.  This is called sequentially
 def animate(i):
 
-    om = i*(om1-om0)/nframes + om0
-    dt = om/framerate
+    for j in range(0,framescale-1):
+        om = (i*framescale+j)*(om1-om0)/(nframes*framescale) + om0
+        dt = om/(framerate*framescale)
 
-    rot = np.array([[np.cos(dt),np.sin(dt)],[-np.sin(dt),np.cos(dt)]])
+        rot = np.array([[np.cos(dt),np.sin(dt)],[-np.sin(dt),np.cos(dt)]])
 
-    #x = x0 - vf/60/framerate*i
-    x = x0 + i*dl
-    y = y0
+        #x = x0 - vf/60/framerate*i
+        x = x0 + (i*framescale+j)*dl/framescale
+        y = y0
 
     #if(x<0):
     #    dt = -dt
 
     #ddata = disk.get_data()
-    ldata = line.get_data()
+        ldata = line.get_data()
 
     #rotation = np.matmul(rot,np.array(ddata))
     #ddata2 = rotation.tolist()
 
-    rotation = np.matmul(rot,np.array(ldata))
-    ldata2 = rotation.tolist()
+        rotation = np.matmul(rot,np.array(ldata))
+        ldata2 = rotation.tolist()
 
-    point.set_marker("")
+        point.set_marker("")
 
-    ldata2[0].append(x)
-    ldata2[1].append(y)
-    point.set_marker("o")
-    point.set_data(x, y)
+        ldata2[0].append(x)
+        ldata2[1].append(y)
+        point.set_marker("o")
+        point.set_data(x, y)
 
-    #disk.set_data(ddata2)
-    line.set_data(ldata2)
-    #inlet.set_data([[d1/2*np.cos(theta0-i*dt)],[d1/2*np.sin(theta0-i*dt)]])
+        #disk.set_data(ddata2)
+        line.set_data(ldata2)
+        #inlet.set_data([[d1/2*np.cos(theta0-i*dt)],[d1/2*np.sin(theta0-i*dt)]])
 
-    label_rpm.set_text("rotation speed: "+str(np.round(om*60/2/np.pi))+" rpm")
-    label_vc.set_text("cutting speed: "+str(round(np.sqrt((vf**2+(x*om)**2))*60))+" mm/min")
-    label_T.set_text("experiment time: "+str(i*dT/1000)+"/"+str(round(T))+" s")
+        label_rpm.set_text("rotation speed: "+str(round(om*60/2/np.pi,1))+" rpm")
+        label_vc.set_text("cutting speed: "+str(round(np.sqrt((vf**2+(x*om)**2))*60,1))+" mm/min")
+        label_T.set_text("experiment time: "+str(round(i*dT/1000,1))+"/"+str(round(T,1))+" s")
 
     return point, line, label_rpm, label_vc, label_T
 
